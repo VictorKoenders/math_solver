@@ -1,6 +1,6 @@
 use std::num::ParseFloatError;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Constant(f32),
     Add,
