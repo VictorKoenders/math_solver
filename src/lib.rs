@@ -1,23 +1,37 @@
-mod parser;
 mod evaluator;
+mod parser;
 
+#[derive(Debug, Clone, Copy)]
+pub struct Span {
+    pub from: usize,
+    pub to: usize,
+}
 
-pub fn evaluate(statement: String) -> Result<f32, MathError> {
-    let expression = parser::Expression::parse(&statement)?;
+impl Span {
+    pub fn merge(self, other: Span) -> Span {
+        Span {
+            from: self.from.min(other.from),
+            to: self.to.max(other.to),
+        }
+    }
+}
+
+pub fn evaluate(statement: &str) -> Result<f32, MathError> {
+    let expression = parser::Expression::parse(statement)?;
     evaluator::evaluate(expression).map_err(Into::into)
 }
 
 #[derive(Debug)]
 pub enum MathError {
     ParseError(parser::ParseError),
-    EvaluateError(evaluator::EvaluateError)
+    EvaluateError(evaluator::EvaluateError),
 }
 
 impl MathError {
-    pub fn get_position(&self) -> Option<usize> {
+    pub fn get_span(&self) -> Option<Span> {
         match *self {
-            MathError::ParseError(ref e) => e.get_position(),
-            _ => None,
+            MathError::ParseError(ref e) => e.get_span(),
+            MathError::EvaluateError(ref e) => e.get_span(),
         }
     }
 }
