@@ -18,7 +18,7 @@ fn main() {
         }
 
         match math_solver::evaluate(line) {
-            Ok(v) => println!("{}", v),
+            Ok(v) => println!("{:?}", v),
             Err(e) => {
                 if let Some(span) = e.get_span() {
                     println!("{}", line);

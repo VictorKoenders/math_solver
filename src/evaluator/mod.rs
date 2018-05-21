@@ -1,10 +1,11 @@
 use super::Span;
 use parser::{Expression, ExpressionEnum};
+use unit::Unit;
 
 type EvaluatorFn = fn(Expression, Expression) -> Result<Expression, EvaluateError>;
-pub fn evaluate(expr: Expression) -> Result<f32, EvaluateError> {
+pub fn evaluate(expr: Expression) -> Result<Unit, EvaluateError> {
     match expr.expression {
-        ExpressionEnum::Constant(val) => Ok(val),
+        ExpressionEnum::Constant(val) => Ok(Unit::Value(val)),
         ExpressionEnum::Block(mut statements) => {
             if statements.is_empty() {
                 return Err(EvaluateError::EmptyBlock { span: expr.span });
@@ -40,12 +41,15 @@ pub fn evaluate(expr: Expression) -> Result<f32, EvaluateError> {
                             }
                         }),
                 })
-            } else if let ExpressionEnum::Constant(v) = statements[0].expression {
-                Ok(v)
             } else {
-                Err(EvaluateError::InvalidExpression {
-                    span: statements[0].span,
-                })
+                let expr = statements[0].expression.clone();
+                match expr {
+                    ExpressionEnum::Constant(v) => Ok(Unit::Value(v)),
+                    ExpressionEnum::Unit(u) => Ok(u),
+                    _ => Err(EvaluateError::InvalidExpression {
+                        span: statements[0].span,
+                    }),
+                }
             }
         }
         _ => Err(EvaluateError::UnexpectedToken(expr)),
@@ -60,7 +64,7 @@ fn multiply(left: Expression, right: Expression) -> Result<Expression, EvaluateE
 
     Ok(Expression {
         span: left_span.merge(right_span),
-        expression: ExpressionEnum::Constant(left * right),
+        expression: ExpressionEnum::Unit(left * right),
     })
 }
 fn divide(left: Expression, right: Expression) -> Result<Expression, EvaluateError> {
@@ -71,7 +75,7 @@ fn divide(left: Expression, right: Expression) -> Result<Expression, EvaluateErr
 
     Ok(Expression {
         span: left_span.merge(right_span),
-        expression: ExpressionEnum::Constant(left / right),
+        expression: ExpressionEnum::Unit(left / right),
     })
 }
 fn add(left: Expression, right: Expression) -> Result<Expression, EvaluateError> {
@@ -82,7 +86,7 @@ fn add(left: Expression, right: Expression) -> Result<Expression, EvaluateError>
 
     Ok(Expression {
         span: left_span.merge(right_span),
-        expression: ExpressionEnum::Constant(left + right),
+        expression: ExpressionEnum::Unit(left + right),
     })
 }
 fn minus(left: Expression, right: Expression) -> Result<Expression, EvaluateError> {
@@ -93,7 +97,7 @@ fn minus(left: Expression, right: Expression) -> Result<Expression, EvaluateErro
 
     Ok(Expression {
         span: left_span.merge(right_span),
-        expression: ExpressionEnum::Constant(left - right),
+        expression: ExpressionEnum::Unit(left - right),
     })
 }
 

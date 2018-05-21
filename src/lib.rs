@@ -1,5 +1,6 @@
 mod evaluator;
 mod parser;
+mod unit;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Span {
@@ -16,7 +17,7 @@ impl Span {
     }
 }
 
-pub fn evaluate(statement: &str) -> Result<f32, MathError> {
+pub fn evaluate(statement: &str) -> Result<unit::Unit, MathError> {
     let expression = parser::Expression::parse(statement)?;
     evaluator::evaluate(expression).map_err(Into::into)
 }

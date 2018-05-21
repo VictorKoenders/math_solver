@@ -1,5 +1,6 @@
 use super::Span;
 use std::num::ParseFloatError;
+use unit::Unit;
 
 #[derive(Debug, Clone)]
 pub struct Expression {
@@ -16,6 +17,7 @@ impl PartialEq for Expression {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExpressionEnum {
     Constant(f32),
+    Unit(Unit),
     Add,
     Minus,
     Multiply,
